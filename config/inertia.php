@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -21,7 +23,7 @@ return [
 
     'ssr' => [
         'enabled' => true,
-        'url' => env('SSR_URL','http://127.0.0.1:13714'),
+        'url' => env('SSR_URL', 'http://127.0.0.1:13714'),
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
     ],
 
