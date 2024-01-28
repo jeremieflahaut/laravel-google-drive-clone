@@ -1,4 +1,4 @@
-name: Tests
+name: Laravel
 
 on:
   pull_request:
@@ -6,41 +6,7 @@ on:
 
 jobs:
 
-  Build:
-    runs-on: ubuntu-latest
-
-    outputs:
-      composer-cache-key: ${{ steps.composer-cache.outputs.key }}
-      npm-cache-key: ${{ steps.npm-cache.outputs.key }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-
-      - name: Install Composer Dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
-
-      - name: Install npm Dependencies
-        run: npm install
-
-      - name: Upload Composer Dependencies as Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: composer-vendor
-          path: vendor/
-
-      - name: Upload npm Dependencies as Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: npm-node-modules
-          path: node_modules/
-
   Pint:
-    needs: Build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -54,17 +20,8 @@ jobs:
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-      - name: Download Composer Dependencies Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: composer-vendor
-          path: vendor/
-
-      - name: Download npm Dependencies Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: npm-node-modules
-          path: node_modules/
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Launch Pint inspection
         run: vendor/bin/pint
@@ -76,7 +33,7 @@ jobs:
           skip_fetch: true
 
   Tests:
-    needs: Build
+    needs: Pint
     runs-on: ubuntu-latest
     steps:
 
@@ -86,20 +43,11 @@ jobs:
         with:
           php-version: '8.2'
 
-      - name: Download Composer Dependencies Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: composer-vendor
-          path: vendor/
-
-      - name: Download npm Dependencies Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: npm-node-modules
-          path: node_modules/
-
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Generate key
         run: php artisan key:generate
@@ -111,6 +59,9 @@ jobs:
         run: |
           mkdir -p database
           touch database/database.sqlite
+
+      - name: Install npm Dependencies
+        run: npm install
 
       - name: Compile assets
         run: npm run build
