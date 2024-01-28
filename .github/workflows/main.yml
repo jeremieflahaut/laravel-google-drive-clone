@@ -6,6 +6,47 @@ on:
 
 jobs:
 
+  Build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      composer-cache-key: ${{ steps.composer-cache.outputs.key }}
+      npm-cache-key: ${{ steps.npm-cache.outputs.key }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Get Composer Cache Key
+        id: composer-cache
+        run: echo "::set-output name=key::$(echo \"composer-${{ hashFiles('**/composer.lock') }}\")"
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ steps.composer-cache.outputs.key }}
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Get npm Cache Key
+        id: npm-cache
+        run: echo "::set-output name=key::$(echo \"npm-${{ hashFiles('**/package-lock.json') }}\")"
+
+      - name: Cache npm Dependencies
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ steps.npm-cache.outputs.key }}
+
+      - name: Install npm Dependencies
+        run: npm install
+
   Pint:
     runs-on: ubuntu-latest
     permissions:
@@ -20,8 +61,17 @@ jobs:
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-      - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ needs.Build.outputs.composer-cache-key }}
+
+      - name: Cache npm Dependencies
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ needs.Build.outputs.npm-cache-key }}
 
       - name: Launch Pint inspection
         run: vendor/bin/pint
@@ -32,7 +82,7 @@ jobs:
           commit_message: PHP Linting (Pint)
           skip_fetch: true
 
-  tests:
+  Tests:
     needs: Pint
     runs-on: ubuntu-latest
     steps:
@@ -45,8 +95,17 @@ jobs:
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-      - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ needs.Build.outputs.composer-cache-key }}
+
+      - name: Cache npm Dependencies
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ needs.Build.outputs.npm-cache-key }}
 
       - name: Generate key
         run: php artisan key:generate
@@ -58,9 +117,6 @@ jobs:
         run: |
           mkdir -p database
           touch database/database.sqlite
-
-      - name: Install NPM dependencies
-        run: npm install
 
       - name: Compile assets
         run: npm run build
@@ -78,7 +134,7 @@ jobs:
           push_badge: false
 
       - name: Git push to badges branch
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           publish_dir: ./output
           publish_branch: badges
