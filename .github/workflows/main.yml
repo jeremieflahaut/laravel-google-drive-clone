@@ -58,6 +58,12 @@ jobs:
           mkdir -p database
           touch database/database.sqlite
 
+      - name: Install NPM dependencies
+        run: npm install
+
+      - name: Compile assets
+        run: npm run build 
+
       - name: Execute tests (Unit and Feature tests) via Pest
         env:
           DB_CONNECTION: sqlite
