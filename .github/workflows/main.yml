@@ -84,7 +84,7 @@ jobs:
           skip_fetch: true
 
   Tests:
-    needs: Pint
+    needs: Build
     runs-on: ubuntu-latest
     steps:
 
