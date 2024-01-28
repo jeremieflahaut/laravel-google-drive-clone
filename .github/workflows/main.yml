@@ -21,31 +21,23 @@ jobs:
         with:
           php-version: '8.2'
 
-      - name: Get Composer Cache Key
-        id: composer-cache
-        run: echo "::set-output name=key::$(echo \"composer-${{ hashFiles('**/composer.lock') }}\")"
-
-      - name: Cache Composer Dependencies
-        uses: actions/cache@v2
-        with:
-          path: vendor
-          key: ${{ steps.composer-cache.outputs.key }}
-
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Get npm Cache Key
-        id: npm-cache
-        run: echo "::set-output name=key::$(echo \"npm-${{ hashFiles('**/package-lock.json') }}\")"
-
-      - name: Cache npm Dependencies
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ steps.npm-cache.outputs.key }}
-
       - name: Install npm Dependencies
         run: npm install
+
+      - name: Upload Composer Dependencies as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: composer-vendor
+          path: vendor/
+
+      - name: Upload npm Dependencies as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: npm-node-modules
+          path: node_modules/
 
   Pint:
     needs: Build
@@ -62,17 +54,17 @@ jobs:
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-      - name: Cache Composer Dependencies
-        uses: actions/cache@v2
+      - name: Download Composer Dependencies Artifact
+        uses: actions/download-artifact@v2
         with:
-          path: vendor
-          key: ${{ needs.Build.outputs.composer-cache-key }}
+          name: composer-vendor
+          path: vendor/
 
-      - name: Cache npm Dependencies
-        uses: actions/cache@v2
+      - name: Download npm Dependencies Artifact
+        uses: actions/download-artifact@v2
         with:
-          path: node_modules
-          key: ${{ needs.Build.outputs.npm-cache-key }}
+          name: npm-node-modules
+          path: node_modules/
 
       - name: Launch Pint inspection
         run: vendor/bin/pint
@@ -94,20 +86,20 @@ jobs:
         with:
           php-version: '8.2'
 
+      - name: Download Composer Dependencies Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: composer-vendor
+          path: vendor/
+
+      - name: Download npm Dependencies Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: npm-node-modules
+          path: node_modules/
+
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-
-      - name: Cache Composer Dependencies
-        uses: actions/cache@v2
-        with:
-          path: vendor
-          key: ${{ needs.Build.outputs.composer-cache-key }}
-
-      - name: Cache npm Dependencies
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ needs.Build.outputs.npm-cache-key }}
 
       - name: Generate key
         run: php artisan key:generate
