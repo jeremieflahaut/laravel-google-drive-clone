@@ -104,4 +104,4 @@ jobs:
         run: npm install
 
       - name: Check TypeScript Types
-        run: npx tsc --noEmit
+        run: npx tsc-vue --noEmit
