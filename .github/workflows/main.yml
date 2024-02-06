@@ -33,11 +33,26 @@ jobs:
           commit_message: PHP Linting (Pint)
           skip_fetch: true
 
+  Tsc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install npm Dependencies
+        run: npm install
+
+      - name: Check TypeScript Types
+        run: npm run tsc
+
   Tests:
     needs: Pint
     runs-on: ubuntu-latest
     steps:
-
       - uses: actions/checkout@v4
 
       - uses: shivammathur/setup-php@v2
@@ -87,21 +102,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-
-  Tsc:
-    needs: Tests
-    runs-on: ubuntu-latest
-    steps:
-
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install npm Dependencies
-        run: npm install
-
-      - name: Check TypeScript Types
-        run: npx tsc-vue --noEmit
