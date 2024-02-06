@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  Pint:
+  pint:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -33,7 +33,7 @@ jobs:
           commit_message: PHP Linting (Pint)
           skip_fetch: true
 
-  Tsc:
+  tsc:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,8 +49,8 @@ jobs:
       - name: Check TypeScript Types
         run: npm run tsc
 
-  Tests:
-    needs: Pint
+  tests:
+    needs: [pint, tsc]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
