@@ -24,11 +24,6 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
       - name: Install npm Dependencies
         run: npm install
 
@@ -43,6 +38,7 @@ jobs:
         with:
           commit_message: PHP Linting (Pint)
           skip_fetch: true
+          file_pattern: app/
 
   tests:
     needs: pint
