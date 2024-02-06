@@ -24,6 +24,17 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install npm Dependencies
+        run: npm install
+
+      - name: Check TypeScript Types
+        run: npm run tsc
+
       - name: Launch Pint inspection
         run: vendor/bin/pint
 
@@ -33,22 +44,8 @@ jobs:
           commit_message: PHP Linting (Pint)
           skip_fetch: true
 
-  tsc:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-
-      - name: Install npm Dependencies
-        run: npm install
-
-      - name: Check TypeScript Types
-        run: npm run tsc
-
   tests:
-    needs: [pint, tsc]
+    needs: pint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
