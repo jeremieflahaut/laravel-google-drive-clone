@@ -11,6 +11,7 @@
         "declare_parentheses": true,
         "declare_strict_types": true,
         "explicit_string_variable": true,
-        "no_unused_imports": true
+        "no_unused_imports": true,
+        "fully_qualified_strict_types": true
     }
 }

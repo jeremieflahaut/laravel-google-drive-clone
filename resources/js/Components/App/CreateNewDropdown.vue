@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import {Menu, MenuButton, MenuItems, MenuItem} from '@headlessui/vue'
+import CreateFolderModal from "@/Components/App/CreateFolderModal.vue";
+import {ref} from "vue";
+
+const createFolderModal = ref(false)
+
+function showCreateFolderModal() {
+    createFolderModal.value = true;
+}
 
 </script>
 
@@ -10,9 +18,8 @@ import {Menu, MenuButton, MenuItems, MenuItem} from '@headlessui/vue'
             text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
         >
             Create New
-
         </MenuButton>
-        
+
         <transition
             enter-active-class="transition duration-100 ease-out"
             enter-from-class="transform scale-95 opacity-0"
@@ -26,7 +33,8 @@ import {Menu, MenuButton, MenuItems, MenuItem} from '@headlessui/vue'
             >
                 <div class="px-1 py-1">
                     <MenuItem v-slot="{ active }">
-                        <a class="text-gray-700 block px-4 py-2 text-sm">
+                        <a href="#" @click.prevent="showCreateFolderModal()"
+                           class="text-gray-700 block px-4 py-2 text-sm">
                             New Folder
                         </a>
                     </MenuItem>
@@ -48,7 +56,7 @@ import {Menu, MenuButton, MenuItems, MenuItem} from '@headlessui/vue'
             </MenuItems>
         </transition>
     </Menu>
-
+    <CreateFolderModal v-model="createFolderModal"/>
 </template>
 
 <style scoped>
