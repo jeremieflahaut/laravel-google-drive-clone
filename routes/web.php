@@ -27,7 +27,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::controller(\App\Http\Controllers\FileController::class)
+Route::controller(App\Http\Controllers\FileController::class)
     ->middleware(['auth', 'verified'])
     ->group(function () {
         Route::get('/my-files/{folder?}', 'myFiles')
