@@ -54,7 +54,7 @@ class FileController extends Controller
         $parent->appendNode($file);
     }
 
-    protected function getRoot()
+    protected function getRoot(): mixed
     {
         return File::query()
             ->whereIsRoot()
